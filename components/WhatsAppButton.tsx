@@ -1,6 +1,6 @@
 'use client'
 export default function WhatsAppButton() {
-  const num = process.env.NEXT_PUBLIC_WHATSAPP || '251XXXXXXXXX'
+  const num = process.env.NEXT_PUBLIC_WHATSAPP || '251909121835'
   return (
     <a href={`https://wa.me/${num}`} target="_blank" rel="noopener noreferrer"
       style={{

@@ -37,7 +37,7 @@ function generateLessonTitles(courseId: string, count: number): string[] {
   return titles
 }
 
-const TELEBIRR_NUMBER = process.env.NEXT_PUBLIC_TELEBIRR_NUMBER || '251XXXXXXXXX'
+const TELEBIRR_NUMBER = process.env.NEXT_PUBLIC_TELEBIRR_NUMBER || '251909121835'
 const ACCOUNT_NAME = 'FundedBirr Academy'
 
 function formatPrice(price: number): string {

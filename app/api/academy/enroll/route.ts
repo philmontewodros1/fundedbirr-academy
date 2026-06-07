@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 
 export async function POST(req: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const { user_id, course_id, telebirr_tx_ref, telebirr_phone, amount_etb } = await req.json()
 
     if (!telebirr_tx_ref || !/^[A-Z0-9]{10}$/i.test(telebirr_tx_ref)) {

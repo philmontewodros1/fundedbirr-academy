@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 
 export async function GET(req: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin()
   const { searchParams } = new URL(req.url)
   const user_id = searchParams.get('user_id')
   const course_id = searchParams.get('course_id')
@@ -37,6 +38,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin()
   const { user_id, lesson_id, course_id } = await req.json()
 
   if (!user_id || !lesson_id || !course_id) {

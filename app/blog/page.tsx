@@ -7,42 +7,12 @@ export const metadata: Metadata = {
 }
 
 const articles = [
-  {
-    title: 'How to Trade Gold (XAUUSD) in Ethiopia',
-    desc: 'A complete guide for Ethiopian traders looking to trade gold. Learn about XAU/USD, key drivers, and practical strategies.',
-    category: 'Gold Trading',
-    readTime: '8 min read',
-  },
-  {
-    title: 'What is Forex Trading? Beginner\'s Guide',
-    desc: 'Everything you need to know to start trading forex. From currency pairs to spreads, we break it down in simple terms.',
-    category: 'Forex Basics',
-    readTime: '6 min read',
-  },
-  {
-    title: 'Understanding Candlestick Patterns',
-    desc: 'Master price action with this guide to candlestick patterns. Learn dojis, engulfing, hammers, and shooting stars.',
-    category: 'Technical Analysis',
-    readTime: '10 min read',
-  },
-  {
-    title: 'Risk Management: The Most Important Skill',
-    desc: 'Why protecting your capital matters more than finding the perfect entry. Position sizing, stop-losses, and risk-reward ratios.',
-    category: 'Risk Management',
-    readTime: '7 min read',
-  },
-  {
-    title: 'How to Choose a Trading Strategy',
-    desc: 'Find what works for you. A practical guide to matching your personality with the right trading approach.',
-    category: 'Trading Psychology',
-    readTime: '9 min read',
-  },
-  {
-    title: 'Gold Trading Sessions: Best Times for Ethiopians',
-    desc: 'When to trade gold from Ethiopia. Learn about the London, New York, and Asian sessions and their overlap hours.',
-    category: 'Gold Trading',
-    readTime: '6 min read',
-  },
+  { slug: 'how-to-trade-gold-ethiopia', title: 'How to Trade Gold (XAUUSD) in Ethiopia', desc: 'A complete guide for Ethiopian traders looking to trade gold. Learn about XAU/USD, key drivers, and practical strategies.', category: 'Gold Trading', readTime: '8 min read' },
+  { slug: 'what-is-forex-trading', title: 'What is Forex Trading? Beginner\'s Guide', desc: 'Everything you need to know to start trading forex. From currency pairs to spreads, we break it down in simple terms.', category: 'Forex Basics', readTime: '6 min read' },
+  { slug: 'candlestick-patterns-guide', title: 'Understanding Candlestick Patterns', desc: 'Master price action with this guide to candlestick patterns. Learn dojis, engulfing, hammers, and shooting stars.', category: 'Technical Analysis', readTime: '10 min read' },
+  { slug: 'risk-management-guide', title: 'Risk Management: The Most Important Skill', desc: 'Why protecting your capital matters more than finding the perfect entry. Position sizing, stop-losses, and risk-reward ratios.', category: 'Risk Management', readTime: '7 min read' },
+  { slug: 'how-to-choose-trading-strategy', title: 'How to Choose a Trading Strategy', desc: 'Find what works for you. A practical guide to matching your personality with the right trading approach.', category: 'Trading Psychology', readTime: '9 min read' },
+  { slug: 'gold-trading-sessions-ethiopia', title: 'Gold Trading Sessions: Best Times for Ethiopians', desc: 'When to trade gold from Ethiopia. Learn about the London, New York, and Asian sessions and their overlap hours.', category: 'Gold Trading', readTime: '6 min read' },
 ]
 
 export default function BlogPage() {
@@ -114,7 +84,7 @@ export default function BlogPage() {
               color: 'var(--text-muted)',
             }}>
               <span>{a.readTime}</span>
-              <Link href="/blog" style={{
+              <Link href={`/blog/${a.slug}`} style={{
                 color: 'var(--accent)',
                 fontWeight: 600,
                 textDecoration: 'none',

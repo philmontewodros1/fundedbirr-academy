@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 
 export async function GET() {
+  const supabaseAdmin = getSupabaseAdmin()
   const { data, error } = await supabaseAdmin
     .from('academy_payments')
     .select(`*, academy_users(full_name, email), academy_courses(title, price_etb)`)
@@ -13,6 +14,7 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin()
   const { payment_id, action, rejection_reason } = await req.json()
 
   const { data: payment } = await supabaseAdmin

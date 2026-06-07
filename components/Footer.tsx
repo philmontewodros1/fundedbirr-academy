@@ -31,7 +31,7 @@ export default function Footer() {
         <div>
           <h4 style={{ fontFamily: 'Syne, sans-serif', fontSize: '0.85rem', marginBottom: '1rem' }}>Connect</h4>
           <a href={process.env.NEXT_PUBLIC_TELEGRAM || 'https://t.me/fundedbirr'} target="_blank" style={{ display: 'block', color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.85rem', padding: '3px 0' }}>Telegram</a>
-          <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP || '251XXXXXXXXX'}`} target="_blank" style={{ display: 'block', color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.85rem', padding: '3px 0' }}>WhatsApp</a>
+          <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP || '251909121835'}`} target="_blank" style={{ display: 'block', color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.85rem', padding: '3px 0' }}>WhatsApp</a>
           <Link href="/contact" style={{ display: 'block', color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.85rem', padding: '3px 0' }}>Contact</Link>
           <a href="https://www.fundedbirr.com" target="_blank" style={{ display: 'block', color: 'var(--green)', textDecoration: 'none', fontSize: '0.85rem', padding: '3px 0' }}>FundedBirr Challenge ↗</a>
         </div>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import BootcampCountdown from '@/components/BootcampCountdown'
 
 export const metadata: Metadata = {
   title: '4-Week Bootcamp — FundedBirr Academy',
@@ -47,21 +48,7 @@ export default function BootcampPage() {
           flexWrap: 'wrap',
           marginBottom: '2.5rem',
         }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            padding: '0.75rem 1.25rem',
-            background: 'rgba(40,168,106,0.08)',
-            border: '1px solid rgba(40,168,106,0.15)',
-            borderRadius: '10px',
-          }}>
-            <span style={{ color: 'var(--green)', fontSize: '1.1rem' }}>📅</span>
-            <div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Next Cohort</span>
-              <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--green)' }}>July 2026</span>
-            </div>
-          </div>
+<BootcampCountdown />
           <div style={{
             display: 'flex',
             alignItems: 'center',

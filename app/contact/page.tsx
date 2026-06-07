@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP || 'https://wa.me/251900000000'
+const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP ? `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP}` : 'https://wa.me/251909121835'
 const telegram = process.env.NEXT_PUBLIC_TELEGRAM || 'https://t.me/fundedbirr'
 
 export default function ContactPage() {
