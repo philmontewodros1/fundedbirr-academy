@@ -1,33 +1,54 @@
 'use client'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-const enrolledCourses = [
-  {
-    title: 'Gold Trading Mastery',
-    progress: 60,
-    slug: 'gold-mastery',
-    lessons: 18,
-    completed: 10,
-  },
-  {
-    title: 'Forex Fundamentals',
-    progress: 25,
-    slug: 'forex-fundamentals',
-    lessons: 12,
-    completed: 3,
-  },
-]
+interface CourseData {
+  id: string
+  title: string
+  enrolled: boolean
+  completed: boolean
+  lessons_count: number
+}
 
-const completedCourses = [
-  'Introduction to Forex',
-  'Introduction to Gold Trading',
-  'Candlestick Patterns',
-]
+interface ProgressData {
+  total: number
+  completed_count: number
+  percentage: number
+}
 
 export default function DashboardPage() {
+  const [courses, setCourses] = useState<CourseData[]>([])
+  const [progressMap, setProgressMap] = useState<Record<string, ProgressData>>({})
+  const [loading, setLoading] = useState(true)
+  const userId = 'demo-user'
+
+  useEffect(() => {
+    async function load() {
+      const res = await fetch(`/api/academy/courses?user_id=${userId}`)
+      const data = await res.json()
+      const enrolled = (data.courses || []).filter((c: CourseData) => c.enrolled)
+      setCourses(data.courses || [])
+
+      const prog: Record<string, ProgressData> = {}
+      await Promise.all(enrolled.map(async (c: CourseData) => {
+        const pRes = await fetch(`/api/academy/progress?user_id=${userId}&course_id=${c.id}`)
+        if (pRes.ok) {
+          const pData = await pRes.json()
+          prog[c.id] = pData
+        }
+      }))
+      setProgressMap(prog)
+      setLoading(false)
+    }
+    load()
+  }, [])
+
+  const enrolled = courses.filter(c => c.enrolled)
+  const completed = courses.filter(c => c.completed)
+  const freeCompleted = courses.filter(c => !c.paid && c.enrolled)
+
   return (
     <div style={{ padding: '2rem', maxWidth: '1100px', margin: '0 auto' }}>
-      {/* Welcome */}
       <div style={{ marginBottom: '2.5rem' }}>
         <h1 style={{
           fontFamily: "'Syne', sans-serif",
@@ -51,9 +72,9 @@ export default function DashboardPage() {
         marginBottom: '2.5rem',
       }}>
         {[
-          { label: 'Enrolled Courses', value: '3', color: 'var(--blue-light)' },
-          { label: 'Completed', value: '3', color: 'var(--green)' },
-          { label: 'Certification Status', value: 'Not Started', color: 'var(--gold)', small: true },
+          { label: 'Enrolled Courses', value: String(enrolled.length), color: 'var(--blue-light)' },
+          { label: 'Completed', value: String(completed.length), color: 'var(--green)' },
+          { label: 'Certification Status', value: completed.some(c => c.id === 'certification') ? 'Passed' : 'Not Started', color: 'var(--gold)', small: true },
         ].map((stat, i) => (
           <div key={i} className="card" style={{ textAlign: 'center' }}>
             <div style={{
@@ -63,7 +84,7 @@ export default function DashboardPage() {
               color: stat.color,
               marginBottom: '0.3rem',
             }}>
-              {stat.value}
+              {loading ? '...' : stat.value}
             </div>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
               {stat.label}
@@ -83,130 +104,148 @@ export default function DashboardPage() {
         }}>
           Your Courses
         </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {enrolledCourses.map((course, i) => (
-            <div key={i} className="card" style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '1.5rem',
-            }}>
-              <div style={{ flex: 1 }}>
-                <h3 style={{
-                  fontFamily: "'Syne', sans-serif",
-                  fontSize: '0.95rem',
-                  fontWeight: 700,
-                  color: 'var(--text)',
-                  marginBottom: '0.75rem',
-                }}>
-                  {course.title}
-                </h3>
-                <div style={{
+        {loading ? (
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>Loading your courses...</p>
+        ) : enrolled.length === 0 ? (
+          <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
+              You are not enrolled in any courses yet.
+            </p>
+            <Link href="/courses" className="btn-primary">
+              Browse Courses
+            </Link>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {enrolled.map((course) => {
+              const prog = progressMap[course.id] || { total: course.lessons_count, completed_count: 0, percentage: 0 }
+              return (
+                <div key={course.id} className="card" style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.75rem',
-                  marginBottom: '0.4rem',
+                  justifyContent: 'space-between',
+                  gap: '1.5rem',
                 }}>
-                  <div style={{
-                    flex: 1,
-                    height: 6,
-                    background: 'rgba(255,255,255,0.06)',
-                    borderRadius: 100,
-                    overflow: 'hidden',
-                  }}>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{
+                      fontFamily: "'Syne', sans-serif",
+                      fontSize: '0.95rem',
+                      fontWeight: 700,
+                      color: 'var(--text)',
+                      marginBottom: '0.75rem',
+                    }}>
+                      {course.title}
+                    </h3>
                     <div style={{
-                      width: `${course.progress}%`,
-                      height: '100%',
-                      background: course.progress >= 60 ? 'var(--green)' : 'var(--blue)',
-                      borderRadius: 100,
-                      transition: 'width 0.4s ease',
-                    }} />
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      marginBottom: '0.4rem',
+                    }}>
+                      <div style={{
+                        flex: 1,
+                        height: 6,
+                        background: 'rgba(255,255,255,0.06)',
+                        borderRadius: 100,
+                        overflow: 'hidden',
+                      }}>
+                        <div style={{
+                          width: `${prog.percentage}%`,
+                          height: '100%',
+                          background: prog.percentage >= 60 ? 'var(--green)' : 'var(--blue)',
+                          borderRadius: 100,
+                          transition: 'width 0.4s ease',
+                        }} />
+                      </div>
+                      <span style={{
+                        fontSize: '0.78rem',
+                        color: 'var(--text-muted)',
+                        fontWeight: 600,
+                        minWidth: '2.5rem',
+                        textAlign: 'right',
+                      }}>
+                        {prog.percentage}%
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      {prog.completed_count} of {prog.total} lessons complete
+                    </div>
                   </div>
-                  <span style={{
-                    fontSize: '0.78rem',
-                    color: 'var(--text-muted)',
-                    fontWeight: 600,
-                    minWidth: '2.5rem',
-                    textAlign: 'right',
-                  }}>
-                    {course.progress}%
-                  </span>
+                  <Link
+                    href={`/courses/${course.id}`}
+                    className="btn-primary"
+                    style={{ whiteSpace: 'nowrap' }}
+                  >
+                    Continue
+                  </Link>
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  {course.completed} of {course.lessons} lessons complete
-                </div>
-              </div>
-              <Link
-                href={`/courses/${course.slug}`}
-                className="btn-primary"
-                style={{ whiteSpace: 'nowrap' }}
-              >
-                Continue
-              </Link>
-            </div>
-          ))}
-        </div>
+              )
+            })}
+          </div>
+        )}
       </section>
 
       {/* Completed Courses */}
-      <section style={{ marginBottom: '2.5rem' }}>
-        <h2 style={{
-          fontFamily: "'Syne', sans-serif",
-          fontSize: '1.15rem',
-          fontWeight: 700,
-          color: 'var(--text)',
-          marginBottom: '1rem',
-        }}>
-          Completed Courses
-        </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {completedCourses.map((title, i) => (
-            <div key={i} className="card" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '1rem 1.25rem',
-            }}>
-              <span style={{
-                width: 24,
-                height: 24,
-                borderRadius: '50%',
-                background: 'rgba(40,168,106,0.12)',
-                color: 'var(--green)',
+      {completed.length > 0 && (
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2 style={{
+            fontFamily: "'Syne', sans-serif",
+            fontSize: '1.15rem',
+            fontWeight: 700,
+            color: 'var(--text)',
+            marginBottom: '1rem',
+          }}>
+            Completed Courses
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {completed.map((course) => (
+              <div key={course.id} className="card" style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                flexShrink: 0,
+                gap: '0.75rem',
+                padding: '1rem 1.25rem',
               }}>
-                ✓
-              </span>
-              <span style={{
-                flex: 1,
-                fontSize: '0.88rem',
-                color: 'var(--text)',
-                fontWeight: 500,
-              }}>
-                {title}
-              </span>
-              <span style={{
-                fontSize: '0.65rem',
-                color: 'var(--green)',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                background: 'rgba(40,168,106,0.08)',
-                padding: '2px 10px',
-                borderRadius: '100px',
-                border: '1px solid rgba(40,168,106,0.15)',
-              }}>
-                Certificate
-              </span>
-            </div>
-          ))}
-        </div>
-      </section>
+                <span style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: '50%',
+                  background: 'rgba(40,168,106,0.12)',
+                  color: 'var(--green)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  flexShrink: 0,
+                }}>
+                  ✓
+                </span>
+                <span style={{
+                  flex: 1,
+                  fontSize: '0.88rem',
+                  color: 'var(--text)',
+                  fontWeight: 500,
+                }}>
+                  {course.title}
+                </span>
+                <span style={{
+                  fontSize: '0.65rem',
+                  color: 'var(--green)',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  background: 'rgba(40,168,106,0.08)',
+                  padding: '2px 10px',
+                  borderRadius: '100px',
+                  border: '1px solid rgba(40,168,106,0.15)',
+                }}>
+                  Certificate
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Next Steps */}
       <section>
