@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 
     const userId = authUser.user.id
 
-    const { error: profileError } = await supabaseAdmin.from('users').upsert({
+    const { error: profileError } = await supabaseAdmin.from('academy_users').upsert({
       id: userId,
       email,
       full_name: fullName,

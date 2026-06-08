@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { requireAcademyAdmin } from '@/lib/admin-guard-academy'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireAcademyAdmin(req)
   const supabaseAdmin = getSupabaseAdmin()
 
   const { data: users, error: usersError } = await supabaseAdmin
-    .from('users')
+    .from('academy_users')
     .select('id, email, full_name, phone, is_admin, created_at')
     .order('created_at', { ascending: false })
 
@@ -30,11 +32,12 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
+  const auth = await requireAcademyAdmin(req)
   const supabaseAdmin = getSupabaseAdmin()
   const { user_id, is_admin } = await req.json()
 
   const { error } = await supabaseAdmin
-    .from('users')
+    .from('academy_users')
     .update({ is_admin })
     .eq('id', user_id)
 

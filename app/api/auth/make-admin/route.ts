@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { data: user } = await supabaseAdmin
-      .from('users')
+      .from('academy_users')
       .select('id, email, is_admin')
       .eq('email', email)
       .single()
@@ -22,14 +22,14 @@ export async function POST(req: NextRequest) {
       if (!authUser) {
         return NextResponse.json({ error: 'User not found. They must register first.' }, { status: 404 })
       }
-      await supabaseAdmin.from('users').upsert({
+      await supabaseAdmin.from('academy_users').upsert({
         id: authUser.id,
         email,
         full_name: authUser.user_metadata?.full_name || email.split('@')[0],
         is_admin: true,
       })
     } else {
-      await supabaseAdmin.from('users').update({ is_admin: true }).eq('email', email)
+      await supabaseAdmin.from('academy_users').update({ is_admin: true }).eq('email', email)
     }
 
     return NextResponse.json({ success: true, message: `${email} is now an admin.` })

@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useAuth } from '@/lib/auth-context'
 
 interface CourseData {
   id: string
@@ -17,12 +18,14 @@ interface ProgressData {
 }
 
 export default function DashboardPage() {
+  const { user, loading: authLoading } = useAuth()
   const [courses, setCourses] = useState<CourseData[]>([])
   const [progressMap, setProgressMap] = useState<Record<string, ProgressData>>({})
   const [loading, setLoading] = useState(true)
-  const userId = 'demo-user'
 
   useEffect(() => {
+    const userId = user?.id
+    if (!userId) return
     async function load() {
       const res = await fetch(`/api/academy/courses?user_id=${userId}`)
       const data = await res.json()
@@ -45,7 +48,6 @@ export default function DashboardPage() {
 
   const enrolled = courses.filter(c => c.enrolled)
   const completed = courses.filter(c => c.completed)
-  const freeCompleted = courses.filter(c => !c.paid && c.enrolled)
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1100px', margin: '0 auto' }}>

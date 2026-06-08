@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { requireAcademyAdmin } from '@/lib/admin-guard-academy'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireAcademyAdmin(req)
   const supabaseAdmin = getSupabaseAdmin()
   const { data, error } = await supabaseAdmin
     .from('academy_payments')
@@ -14,6 +16,7 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
+  const auth = await requireAcademyAdmin(req)
   const supabaseAdmin = getSupabaseAdmin()
   const { payment_id, action, rejection_reason } = await req.json()
 

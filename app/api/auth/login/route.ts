@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     const supabaseAdmin = (await import('@/lib/supabase')).getSupabaseAdmin()
     const { data: profile } = await supabaseAdmin
-      .from('users')
+      .from('academy_users')
       .select('id, email, full_name, is_admin')
       .eq('id', data.user.id)
       .single()

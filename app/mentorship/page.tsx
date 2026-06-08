@@ -34,7 +34,7 @@ const packages = [
       'Strategy customization',
       'Challenge prep',
     ],
-    link: '#',
+    link: 'https://wa.me/251909121835?text=I want to book 1-on-1 mentorship sessions',
     linkText: 'Book Sessions →',
     featured: true,
   },

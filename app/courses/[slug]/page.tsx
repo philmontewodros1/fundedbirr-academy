@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { useAuth } from '@/lib/auth-context'
 
 const COURSES: Record<string, { id: string; title: string; desc: string; price: number; free: boolean; lessons: number; mins: number; cat: string }> = {
   'intro-forex': { id: 'intro-forex', title: 'What is Forex Trading?', desc: 'The complete beginner guide to forex markets, currency pairs, and how trading works.', price: 0, free: true, lessons: 5, mins: 45, cat: 'Beginner' },
@@ -48,6 +49,7 @@ export default function CourseDetail() {
   const params = useParams()
   const slug = params.slug as string
   const course = COURSES[slug]
+  const { user } = useAuth()
 
   const [modalOpen, setModalOpen] = useState(false)
   const [txRef, setTxRef] = useState('')
@@ -111,7 +113,7 @@ export default function CourseDetail() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id: fullName.trim(),
+          user_id: user?.id,
           course_id: course.id,
           telebirr_tx_ref: txRef,
           telebirr_phone: phoneClean,
@@ -211,7 +213,7 @@ export default function CourseDetail() {
                   </svg>
                   Start Free
                 </Link>
-              ) : (
+              ) : user ? (
                 <button
                   className="btn-gold"
                   style={{
@@ -230,6 +232,19 @@ export default function CourseDetail() {
                   </svg>
                   Enroll Now &mdash; {formatPrice(course.price)}
                 </button>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="btn-outline"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    textDecoration: 'none',
+                  }}
+                >
+                  Sign in to Enroll &rarr;
+                </Link>
               )}
               <Link
                 href="/dashboard"
@@ -346,7 +361,7 @@ export default function CourseDetail() {
                         color: 'var(--text-muted)',
                         marginTop: '2px',
                       }}>
-                        {Math.ceil(course.mins / course.lessons)} min
+                        {course.lessons === 0 ? course.mins : course.mins % course.lessons === 0 ? course.mins / course.lessons : `~${Math.ceil(course.mins / course.lessons)}`} min
                       </div>
                     </div>
                   </div>

@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     }
 
     const { data: profile } = await supabaseAdmin
-      .from('users')
+      .from('academy_users')
       .select('id, email, full_name, is_admin')
       .eq('id', user.id)
       .single()
