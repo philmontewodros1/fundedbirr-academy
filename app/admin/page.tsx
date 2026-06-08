@@ -13,6 +13,8 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<Tab>('payments')
   const [payments, setPayments] = useState<any[]>([])
   const [paymentsLoading, setPaymentsLoading] = useState(true)
+  const [students, setStudents] = useState<any[]>([])
+  const [studentsLoading, setStudentsLoading] = useState(true)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
@@ -22,6 +24,15 @@ export default function AdminPage() {
       router.push('/auth/login')
     }
   }, [user, loading, router])
+
+  useEffect(() => {
+    if (!user?.is_admin) return
+    fetch('/api/academy/admin/students')
+      .then((res) => res.json())
+      .then((data) => setStudents(data.students || []))
+      .catch(() => {})
+      .finally(() => setStudentsLoading(false))
+  }, [user])
 
   useEffect(() => {
     if (!user?.is_admin) return
@@ -35,6 +46,23 @@ export default function AdminPage() {
       })
       .finally(() => setPaymentsLoading(false))
   }, [user])
+
+  const handleToggleAdmin = async (userId: string, email: string) => {
+    try {
+      const res = await fetch('/api/academy/admin/students', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, is_admin: true }),
+      })
+      if (!res.ok) throw new Error('Request failed')
+      setStudents((prev) => prev.filter((s) => s.id !== userId))
+      setSuccessMsg(`${email} is now an admin.`)
+      setErrorMsg('')
+    } catch {
+      setErrorMsg('Failed to update user.')
+      setSuccessMsg('')
+    }
+  }
 
   const handleAction = async (paymentId: string, action: 'approve' | 'reject') => {
     try {
@@ -214,10 +242,64 @@ export default function AdminPage() {
       )}
 
       {activeTab === 'students' && (
-        <div className="card" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
-          <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: '1.1rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.5rem' }}>Student Management</h3>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Coming soon</p>
-        </div>
+        <>
+          {studentsLoading ? (
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading students...</p>
+          ) : students.length === 0 ? (
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No students found.</p>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    <th style={{ textAlign: 'left', padding: '0.75rem 0.5rem' }}>Name</th>
+                    <th style={{ textAlign: 'left', padding: '0.75rem 0.5rem' }}>Email</th>
+                    <th style={{ textAlign: 'left', padding: '0.75rem 0.5rem' }}>Phone</th>
+                    <th style={{ textAlign: 'left', padding: '0.75rem 0.5rem' }}>Registered</th>
+                    <th style={{ textAlign: 'center', padding: '0.75rem 0.5rem' }}>Courses</th>
+                    <th style={{ textAlign: 'center', padding: '0.75rem 0.5rem' }}>Admin</th>
+                    <th style={{ textAlign: 'right', padding: '0.75rem 0.5rem' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.map((s: any) => (
+                    <tr key={s.id} style={{ borderBottom: '1px solid rgba(78,130,220,0.08)' }}>
+                      <td style={{ padding: '0.75rem 0.5rem', color: 'var(--text)', fontWeight: 500 }}>{s.full_name || 'N/A'}</td>
+                      <td style={{ padding: '0.75rem 0.5rem', color: 'var(--text-muted)' }}>{s.email}</td>
+                      <td style={{ padding: '0.75rem 0.5rem', color: 'var(--text-muted)', fontFamily: 'monospace', fontSize: '0.75rem' }}>{s.phone || '-'}</td>
+                      <td style={{ padding: '0.75rem 0.5rem', color: 'var(--text-muted)' }}>
+                        {s.created_at ? new Date(s.created_at).toLocaleDateString() : '-'}
+                      </td>
+                      <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        {s.enrollments?.length || 0}
+                      </td>
+                      <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          width: '8px', height: '8px',
+                          borderRadius: '50%',
+                          background: s.is_admin ? 'var(--green)' : 'rgba(154,152,128,0.3)',
+                        }} />
+                      </td>
+                      <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right' }}>
+                        {!s.is_admin && (
+                          <button onClick={() => handleToggleAdmin(s.id, s.email)} style={{
+                            background: 'rgba(40,168,106,0.12)', color: 'var(--green)',
+                            border: '1px solid rgba(40,168,106,0.25)', borderRadius: '6px',
+                            padding: '0.35rem 0.75rem', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer',
+                          }}>Make Admin</button>
+                        )}
+                        {s.is_admin && (
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Admin</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
       )}
 
       {activeTab === 'courses' && (
