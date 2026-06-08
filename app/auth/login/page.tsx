@@ -1,15 +1,29 @@
 'use client'
 import Link from 'next/link'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/lib/auth-context'
 
 export default function LoginPage() {
+  const router = useRouter()
+  const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setMessage('Login functionality coming soon')
+    setError('')
+    setLoading(true)
+    const err = await login(email, password)
+    setLoading(false)
+
+    if (err) {
+      setError(err)
+    } else {
+      router.push('/dashboard')
+    }
   }
 
   return (
@@ -81,21 +95,26 @@ export default function LoginPage() {
             />
           </div>
 
-          <button type="submit" className="btn-primary" style={{ width: '100%', textAlign: 'center' }}>
-            Sign In
+          <button
+            type="submit"
+            className="btn-primary"
+            style={{ width: '100%', textAlign: 'center', opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+            disabled={loading}
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
 
-          {message && (
+          {error && (
             <p style={{
               fontSize: '0.82rem',
-              color: 'var(--gold)',
+              color: 'var(--red)',
               textAlign: 'center',
-              background: 'rgba(201,145,42,0.08)',
+              background: 'rgba(232,75,75,0.08)',
               padding: '0.6rem 1rem',
               borderRadius: '8px',
-              border: '1px solid rgba(201,145,42,0.15)',
+              border: '1px solid rgba(232,75,75,0.15)',
             }}>
-              {message}
+              {error}
             </p>
           )}
         </form>

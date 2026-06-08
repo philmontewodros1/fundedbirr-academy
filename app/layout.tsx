@@ -3,6 +3,7 @@ import './globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import WhatsAppButton from '@/components/WhatsAppButton'
+import AuthWrapper from '@/components/AuthWrapper'
 
 export const metadata: Metadata = {
   title: 'FundedBirr Academy — Ethiopia\'s Premier Trading Education Institute',
@@ -17,10 +18,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <Header />
-        <main>{children}</main>
-        <Footer />
-        <WhatsAppButton />
+        <AuthWrapper>
+          <Header />
+          <main>{children}</main>
+          <Footer />
+          <WhatsAppButton />
+        </AuthWrapper>
       </body>
     </html>
   )

@@ -1,8 +1,12 @@
 'use client'
 import Link from 'next/link'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/lib/auth-context'
 
 export default function RegisterPage() {
+  const router = useRouter()
+  const { register } = useAuth()
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -11,14 +15,33 @@ export default function RegisterPage() {
     confirmPassword: '',
   })
   const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setMessage('Registration coming soon')
+    setError('')
+    setMessage('')
+
+    if (form.password !== form.confirmPassword) {
+      setError('Passwords do not match.')
+      return
+    }
+
+    setLoading(true)
+    const err = await register(form.fullName, form.email, form.phone, form.password)
+    setLoading(false)
+
+    if (err) {
+      setError(err)
+    } else {
+      setMessage('Account created! You can now sign in.')
+      setTimeout(() => router.push('/auth/login'), 1500)
+    }
   }
 
   return (
@@ -120,9 +143,10 @@ export default function RegisterPage() {
             </label>
             <input
               type="password"
-              placeholder="••••••••"
+              placeholder="At least 6 characters"
               value={form.password}
               onChange={handleChange('password')}
+              minLength={6}
               required
             />
           </div>
@@ -146,19 +170,38 @@ export default function RegisterPage() {
             />
           </div>
 
-          <button type="submit" className="btn-gold" style={{ width: '100%', textAlign: 'center', color: 'var(--navy)' }}>
-            Create Account
+          <button
+            type="submit"
+            className="btn-gold"
+            style={{ width: '100%', textAlign: 'center', color: 'var(--navy)', opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+            disabled={loading}
+          >
+            {loading ? 'Creating account...' : 'Create Account'}
           </button>
+
+          {error && (
+            <p style={{
+              fontSize: '0.82rem',
+              color: 'var(--red)',
+              textAlign: 'center',
+              background: 'rgba(232,75,75,0.08)',
+              padding: '0.6rem 1rem',
+              borderRadius: '8px',
+              border: '1px solid rgba(232,75,75,0.15)',
+            }}>
+              {error}
+            </p>
+          )}
 
           {message && (
             <p style={{
               fontSize: '0.82rem',
-              color: 'var(--gold)',
+              color: 'var(--green)',
               textAlign: 'center',
-              background: 'rgba(201,145,42,0.08)',
+              background: 'rgba(40,168,106,0.08)',
               padding: '0.6rem 1rem',
               borderRadius: '8px',
-              border: '1px solid rgba(201,145,42,0.15)',
+              border: '1px solid rgba(40,168,106,0.15)',
             }}>
               {message}
             </p>
